@@ -1,1 +1,4 @@
-[logo 2](https://user-images.githubusercontent.com/130210516/234183109-b1a2fe76-4388-4843-9d71-a541d0e02fb0.jpg)
+https://github.com/trey020304/test-repository/blob/main/images/logo%202.jpg
+<p align="center">
+    <img src="https://github.com/trey020304/test-repository/blob/main/images/logo%202.jpg" width=512px height=512px/>
+</p>
