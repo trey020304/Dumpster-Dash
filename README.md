@@ -56,3 +56,6 @@ ___
 - <a href="https://github.com/kebinmirabel">Mirabel, Kevin Hans Aurick</a>
 - <a href="https://github.com/JulyanGarcia">Garcia, Julian Simon</a>
 - <a href="">Del Mundo, Ron Gabriel</a>
+
+Email: <a href="">Sample Link</a>
+Contact Number: +63 912 345 6789
