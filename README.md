@@ -55,7 +55,7 @@ ___
 - <a href="https://github.com/trey020304">Marcos, Mark Wilhelm Trevor</a>
 - <a href="https://github.com/kebinmirabel">Mirabel, Kevin Hans Aurick</a>
 - <a href="https://github.com/JulyanGarcia">Garcia, Julian Simon</a>
-- <a href="">Del Mundo, Ron Gabriel</a>
+- <a href="https://github.com/Ronnieee1">Del Mundo, Ron Gabriel</a>
 
 Email: <a href="">Sample Link</a><br>
 Contact Number: +63 912 345 6789
