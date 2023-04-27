@@ -22,6 +22,8 @@ ___
 
 ## ♻️ Significance of the Game ♻️
 
+<img src="https://github.com/trey020304/test-repository/blob/main/images/E-WEB-Goal-12.png" align="left" width=212px/>
+
 <p align="justify">
 According to the 12th goal under the Sustainable Development Goals, it involves establishing sustainable production and consumption habits, which are essential to maintaining the standard of living for both the present and future generations. It calls for more effective and environmentally responsible management of materials throughout their whole lifecycle, from manufacture to disposal. With DumpsterDash's existence, this would not only serve as a fun application but would also raise awareness of the status of our world today in terms of how sustainability and correct segregation of waste is being handled. Since the majority of people play video games on their devices, this game would be helpful in spreading awareness of the 12th Sustainable Development Goal as it would be accessible to practically all age groups and almost anyone with a gadget would be able to play this game!
 </p>
