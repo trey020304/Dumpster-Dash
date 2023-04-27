@@ -54,5 +54,5 @@ ___
 
 - <a href="https://github.com/trey020304">Marcos, Mark Wilhelm Trevor</a>
 - <a href="">Mirabel, Kevin Hans Aurick</a>
-- <a href="">Garcia, Julian Simon</a>
+- <a href="https://github.com/JulyanGarcia">Garcia, Julian Simon</a>
 - <a href="">Del Mundo, Ron Gabriel</a>
