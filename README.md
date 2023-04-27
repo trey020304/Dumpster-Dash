@@ -50,12 +50,16 @@ DumpsterDash is still at its development stage. When the project is finished, we
 
 ___
 
-#### Authors and Contact Details
+## Authors and Contact Details
+
+#### GitHub Accounts:
 
 - <a href="https://github.com/trey020304">Marcos, Mark Wilhelm Trevor</a>
 - <a href="https://github.com/kebinmirabel">Mirabel, Kevin Hans Aurick</a>
 - <a href="https://github.com/JulyanGarcia">Garcia, Julian Simon</a>
 - <a href="https://github.com/Ronnieee1">Del Mundo, Ron Gabriel</a>
+
+#### Other Contacts:
 
 Email: <a href="">Sample Link</a><br>
 Contact Number: +63 912 345 6789
