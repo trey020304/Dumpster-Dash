@@ -61,5 +61,5 @@ ___
 
 #### Other Contacts:
 
-Email: <a href="">Sample Link</a><br>
-Contact Number: +63 912 345 6789
+Email: <a href="">Team Name</a><br>
+Contact Number: +63 908 136 9112
