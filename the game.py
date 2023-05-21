@@ -1,5 +1,7 @@
 #import library
 import pygame
+from pygame.locals import *
+import sys
 
 #initialize pygame
 pygame.init()
@@ -21,6 +23,12 @@ overlap_bg_image = pygame.image.load('assets/bg.png').convert()
 b_pos = 0
 o_pos = 720
 speed = 7
+
+#lane coordinates
+left_lane = 150
+center_lane = 166
+right_lane = 275
+lanes = [left_lane, center_lane, right_lane]
 
 #wally
 class Runner():
@@ -51,27 +59,20 @@ class Runner():
             self.frame_index = 0
     
     def move(self):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_a]:
-            self.rect.x = 50
-            self.rect.y = 500
-        if key[pygame.K_s]:
-            self.rect.x = 166
-            self.rect.y = 500
-        if key[pygame.K_d]:
-            self.rect.x = 275
-            self.rect.y = 500
-        if key[pygame.K_LEFT]:
-            self.rect.x = 50
-            self.rect.y = 500
-        if key[pygame.K_DOWN]:
-            self.rect.x = 166
-            self.rect.y = 500
-        if key[pygame.K_RIGHT]:
-            self.rect.x = 275
-            self.rect.y = 500
-            
         
+        for event in pygame.event.get():
+      
+        # move the player's car using the left/right arrow keys
+            if event.type == KEYDOWN:
+                if event.key == K_LEFT and wally.rect.center[0] > left_lane:
+                    wally.rect.left -= 100
+                elif event.key == K_RIGHT and  wally.rect.center[0] < right_lane:
+                    wally.rect.right += 100
+        
+            
+            
+            
+    
     def draw(self):
         screen.blit(self.image, self.rect)
         
@@ -107,6 +108,7 @@ while gamerun:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gamerun = False
+            sys.exit ()
            
     #update display window
     pygame.display.update()
