@@ -1,0 +1,18 @@
+import time
+
+tracking = time.time()
+
+
+def speed():
+    global tracking
+
+    increase = .01
+
+
+    for x in range(5,1000):
+        print(x)
+        time.sleep(2)
+
+
+
+speed()
