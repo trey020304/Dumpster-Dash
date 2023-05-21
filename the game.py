@@ -15,50 +15,6 @@ screen_h = 720
 screen = pygame.display.set_mode((screen_w, screen_h))
 pygame.display.set_caption('Dumpster Dash')
 
-#wally running
-class Player(pygame.sprite.Sprite,):
-    def __init__(self, x, y):
-        super().__init__()
-        self.sprites = []
-        self.sprites.append(pygame.image.load('assets/frame0000.png'))
-        self.sprites.append(pygame.image.load('assets/frame0001.png'))
-        self.sprites.append(pygame.image.load('assets/frame0002.png'))
-        self.sprites.append(pygame.image.load('assets/frame0003.png'))
-        self.sprites.append(pygame.image.load('assets/frame0004.png'))
-        self.sprites.append(pygame.image.load('assets/frame0005.png'))
-        self.sprites.append(pygame.image.load('assets/frame0006.png'))
-        self.sprites.append(pygame.image.load('assets/frame0007.png'))
-        self.sprites.append(pygame.image.load('assets/frame0008.png'))
-        self.sprites.append(pygame.image.load('assets/frame0009.png'))
-        self.sprites.append(pygame.image.load('assets/frame0010.png'))
-        self.sprites.append(pygame.image.load('assets/frame0011.png'))
-        self.sprites.append(pygame.image.load('assets/frame0012.png'))
-        self.sprites.append(pygame.image.load('assets/frame0013.png'))
-        self.sprites.append(pygame.image.load('assets/frame0014.png'))
-        self.sprites.append(pygame.image.load('assets/frame0015.png'))
-        self.sprites.append(pygame.image.load('assets/frame0016.png'))
-        self.current_sprite = 0
-        self.image = self.sprites[self.current_sprite]
-        
-        self.rect = self.image.get_rect()
-        self.rect.center = [x,y]
-    
-    def update(self):
-        self.current_sprite += .6
-        
-        if self.current_sprite >= len(self.sprites):
-            self.current_sprite = 0
-            
-        self.image = self.sprites[int(self.current_sprite)]
-        
-#wally running - sprites and groups
-moving_sprites = pygame.sprite.Group()
-player = Player(250,575)
-moving_sprites.add(player)
-
-#igagalaw si wally
-#def move(self):
-    
 #scrolling background
 bg_image = pygame.image.load('assets/bg.png').convert()
 overlap_bg_image = pygame.image.load('assets/bg.png').convert()
@@ -66,9 +22,62 @@ b_pos = 0
 o_pos = 720
 speed = 7
 
+#wally
+class Runner():
+    def __init__(self, x, y):
+        self.alive = True
+        self.animation_list = []
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+        for i in range(16):
+            img = pygame.image.load(f'assets/wallyrun/{i}.png')
+            self.animation_list.append(img)
+        self.image = self.animation_list[self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y)
+        
+    def update(self):
+        animation_cooldown = 20
+        #handle animation
+        #update image
+        self.image = self.animation_list[self.frame_index]
+        #check if enough time has passed since last update
+        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
+            self.update_time = pygame.time.get_ticks()
+            self.frame_index += 1
+            
+        #if the animation surpasses last frame, reset
+        if self.frame_index >= len(self.animation_list):
+            self.frame_index = 0
+    
+    def move(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_a]:
+            self.rect.x = 50
+            self.rect.y = 500
+        if key[pygame.K_s]:
+            self.rect.x = 166
+            self.rect.y = 500
+        if key[pygame.K_d]:
+            self.rect.x = 275
+            self.rect.y = 500
+        if key[pygame.K_LEFT]:
+            self.rect.x = 50
+            self.rect.y = 500
+        if key[pygame.K_DOWN]:
+            self.rect.x = 166
+            self.rect.y = 500
+        if key[pygame.K_RIGHT]:
+            self.rect.x = 275
+            self.rect.y = 500
+            
+        
+    def draw(self):
+        screen.blit(self.image, self.rect)
+        
+wally = Runner(250, 575)
+        
 #loop to retain screen
-
-#wally = Player(player)
 
 gamerun = True
 while gamerun:
@@ -76,6 +85,8 @@ while gamerun:
     #pygame.time.delay(60) #pause the program for an amount of time, which uses lots of CPU in a busy loop to make sure that timing is more accurate. 
     
     clock.tick(FPS) #fps of game
+    
+    wally.move()
     
     #draw scrollbackground
     if b_pos >= screen_h:
@@ -88,9 +99,9 @@ while gamerun:
     screen.blit(bg_image, (0, b_pos))
     screen.blit(overlap_bg_image, (0, o_pos))
     
-    moving_sprites.draw(screen)
-    moving_sprites.update()
-    pygame.display.flip()
+    #wally running
+    wally.update()
+    wally.draw()
     
     #event handle
     for event in pygame.event.get():
