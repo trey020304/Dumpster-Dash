@@ -2,6 +2,7 @@
 import pygame
 from pygame.locals import *
 import sys
+import random
 
 #initialize pygame
 pygame.init()
@@ -27,8 +28,16 @@ speed = 7
 #lane coordinates
 left_lane = 150
 center_lane = 166
-right_lane = 275
+right_lane = 275  
 lanes = [left_lane, center_lane, right_lane]
+
+objectleft_lane= 130
+objectcenter_lane= 245
+objectright_lane= 360
+objectlanes = [objectleft_lane, objectcenter_lane, objectright_lane]
+
+# Height
+height = 500
 
 #wally
 class Runner():
@@ -42,7 +51,7 @@ class Runner():
             self.animation_list.append(img)
         self.image = self.animation_list[self.frame_index]
         self.rect = self.image.get_rect()
-        self.rect.center = (x,y)
+        self.rect.center = (x, y)
         
     def update(self):
         animation_cooldown = 20
@@ -59,37 +68,77 @@ class Runner():
             self.frame_index = 0
     
     def move(self):
-        
+        # Event Handle
         for event in pygame.event.get():
-      
-        # move the player's car using the left/right arrow keys
+            # move the player's car using the left/right arrow keys
             if event.type == KEYDOWN:
-                if event.key == K_LEFT and wally.rect.center[0] > left_lane:
-                    wally.rect.left -= 100
-                elif event.key == K_RIGHT and  wally.rect.center[0] < right_lane:
-                    wally.rect.right += 100
-        
-            
-            
-            
-    
+                if event.key == K_LEFT and self.rect.center[0] > left_lane:
+                    self.rect.left -= 100
+                elif event.key == K_RIGHT and self.rect.center[0] < right_lane:
+                    self.rect.right += 100
+                # Quitting the Game           
+                elif event.key == K_ESCAPE:
+                    gamerun = False
+                    sys.exit ()
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
     def draw(self):
         screen.blit(self.image, self.rect)
         
-wally = Runner(250, 575)
+class Garbage(pygame.sprite.Sprite):
+    def __init__(self, image, x, y,):
+        pygame.sprite.Sprite.__init__(self)
         
-#loop to retain screen
+  # scale the image down so it's not wider than the lane
+        image_scale = 100 / image.get_rect().width
+        new_width = image.get_rect().width * image_scale
+        new_height = image.get_rect().height * image_scale
+        self.image = pygame.transform.scale(image, (new_width, new_height))
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
+      
+     
+class Bio(Garbage):
+    pass
 
+class NonBio(Garbage):
+    pass
+
+# Sprite groups
+garbage_group = pygame.sprite.Group()
+
+# Load the garbage images
+gar1 = Bio
+bio_filenames = ['banana peel.png', 'milk carton.png', 'box.png']
+biodegradable_images = []
+for bio_filename in bio_filenames:
+    image = pygame.image.load('assets/' + bio_filename)
+    biodegradable_images.append(image) 
+
+gar2 = NonBio
+nonbio_filenames = ['plastic bag.png', 'soda bottle.png', 'water bottle.png']
+nonbiodegradable_images = []
+for nonbio_filename in nonbio_filenames:
+    image = pygame.image.load('assets/' + nonbio_filename)
+    
+    nonbiodegradable_images.append(image)
+
+# ...
+
+
+wally = Runner(250, 575)
+
+# ...
+
+# Loop to retain screen
 gamerun = True
 while gamerun:
-    
-    #pygame.time.delay(60) #pause the program for an amount of time, which uses lots of CPU in a busy loop to make sure that timing is more accurate. 
-    
-    clock.tick(FPS) #fps of game
-    
+    clock.tick(FPS)  # FPS of game
+
     wally.move()
-    
-    #draw scrollbackground
+
+    # Draw scrolling background
     if b_pos >= screen_h:
         b_pos = -screen_h
     if o_pos >= screen_h:
@@ -99,18 +148,51 @@ while gamerun:
     o_pos += speed
     screen.blit(bg_image, (0, b_pos))
     screen.blit(overlap_bg_image, (0, o_pos))
-    
-    #wally running
+
+    # Wally running
     wally.update()
     wally.draw()
-    
-    #event handle
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            gamerun = False
-            sys.exit ()
-           
-    #update display window
-    pygame.display.update()
 
-pygame.QUIT()
+    # Add a garbage
+    
+    # Ensure there's enough gap between garbage items
+    if len(garbage_group) < 3:
+
+        add_garbage = True
+        for garbage in garbage_group:
+            if garbage.rect.top < garbage.rect.height * 1: #Closeness of spawning 
+                add_garbage = False
+                
+        if add_garbage:
+            # Select a random lane
+            lane = random.choice(objectlanes)
+            
+            garbage_list = [gar1, gar2]
+            
+            # Select a random garbage object
+            garbage_object = random.choice(garbage_list)
+        
+            # Select a random garbage image
+            if garbage_object == gar1:
+                image = random.choice(biodegradable_images)
+            else:
+                image = random.choice(nonbiodegradable_images)
+        
+            # Create a new garbage object with the selected image
+            garbage = garbage_object(image, lane, -height / 2)
+            garbage.rect.center = (lane, -height / 2)
+            garbage_group.add(garbage)
+
+    # Move the garbage and remove it if it goes off screen
+    for garbage in garbage_group:
+        garbage.rect.y += speed
+
+        # Remove garbage once it goes off screen
+        if garbage.rect.top >= height:
+            garbage.kill()
+
+    # Draw the garbage
+    garbage_group.draw(screen)
+
+    # Update display window
+    pygame.display.update()
