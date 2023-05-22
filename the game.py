@@ -40,18 +40,18 @@ objectlanes = [objectleft_lane, objectcenter_lane, objectright_lane]
 height = 500
 
 #wally
-class Runner():
+class NonBio:
     def __init__(self, x, y):
         self.alive = True
         self.animation_list = []
         self.frame_index = 0
         self.update_time = pygame.time.get_ticks()
         for i in range(16):
-            img = pygame.image.load(f'assets/wallyrun/{i}.png')
+            img = pygame.image.load(f'assets/wallyrunnonbio/{i}.png')
             self.animation_list.append(img)
         self.image = self.animation_list[self.frame_index]
         self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
+        self.rect.center = (x,y)
         
     def update(self):
         animation_cooldown = 20
@@ -66,44 +66,99 @@ class Runner():
         #if the animation surpasses last frame, reset
         if self.frame_index >= len(self.animation_list):
             self.frame_index = 0
-    
-    def move(self):
-        # Event Handle
-        for event in pygame.event.get():
-            # move the player's car using the left/right arrow keys
-            if event.type == KEYDOWN:
-                if event.key == K_LEFT and self.rect.center[0] > left_lane:
-                    self.rect.left -= 100
-                elif event.key == K_RIGHT and self.rect.center[0] < right_lane:
-                    self.rect.right += 100
-                # Quitting the Game           
-                elif event.key == K_ESCAPE:
-                    gamerun = False
-                    sys.exit ()
-            if event.type == pygame.QUIT:
-                pygame.quit()
+        
+    def draw(self):
+        screen.blit(self.image, self.rect)
 
+        # trait = nonbio
+
+class Bio:
+    def __init__(self, x, y):
+        self.alive = True
+        self.animation_list = []
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+        for i in range(16):
+            img = pygame.image.load(f'assets/wallyrunbio/{i}.png')
+            self.animation_list.append(img)
+        self.image = self.animation_list[self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y)
+    
+    def update(self):
+        animation_cooldown = 20
+        #handle animation
+        #update image
+        self.image = self.animation_list[self.frame_index]
+        #check if enough time has passed since last update
+        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
+            self.update_time = pygame.time.get_ticks()
+            self.frame_index += 1
+            
+        #if the animation surpasses last frame, reset
+        if self.frame_index >= len(self.animation_list):
+            self.frame_index = 0
+        
     def draw(self):
         screen.blit(self.image, self.rect)
         
+        # trait = bio
+
+
+class Runner(NonBio, Bio):
+    
+    def move(self):
+        
+        # Event Handle
+        for event in pygame.event.get():
+      
+            # move the player's car using the left/right arrow keys
+                if event.type == KEYDOWN:
+                    if event.key == K_LEFT and wally.rect.center[0] > left_lane:
+                        wally.rect.left -= 115
+                    elif event.key == K_RIGHT and  wally.rect.center[0] < right_lane:
+                        wally.rect.right += 115
+                        
+             # Quitting the Game           
+                    elif event.key == K_ESCAPE:
+                        gamerun = False
+                        sys.exit ()
+                if (event.type == pygame.QUIT):
+                                    pygame.quit()
+""""                                                                 
+def change_class():
+        global obj
+        for event in pygame.event.get():
+            if event.key == K_q:
+                if isinstance(obj, Bio):
+                    obj = NonBio()   
+            elif event.key == K_e:
+                obj = Bio()
+            obj.display()    """              
+                    
+                                    
+
+
+wally = Runner(250, 575)
+    
 class Garbage(pygame.sprite.Sprite):
-    def __init__(self, image, x, y,):
-        pygame.sprite.Sprite.__init__(self)
+        def __init__(self, image, x, y,):
+            pygame.sprite.Sprite.__init__(self)
         
   # scale the image down so it's not wider than the lane
-        image_scale = 100 / image.get_rect().width
-        new_width = image.get_rect().width * image_scale
-        new_height = image.get_rect().height * image_scale
-        self.image = pygame.transform.scale(image, (new_width, new_height))
-        self.rect = self.image.get_rect()
-        self.rect.center = [x, y]
+            image_scale = 100 / image.get_rect().width
+            new_width = image.get_rect().width * image_scale
+            new_height = image.get_rect().height * image_scale
+            self.image = pygame.transform.scale(image, (new_width, new_height))
+            self.rect = self.image.get_rect()
+            self.rect.center = [x, y]
       
      
 class Bio(Garbage):
-    pass
+        pass
 
 class NonBio(Garbage):
-    pass
+        pass
 
 # Sprite groups
 garbage_group = pygame.sprite.Group()
@@ -124,12 +179,8 @@ for nonbio_filename in nonbio_filenames:
     
     nonbiodegradable_images.append(image)
 
-# ...
-
 
 wally = Runner(250, 575)
-
-# ...
 
 # Loop to retain screen
 gamerun = True
@@ -152,7 +203,7 @@ while gamerun:
     # Wally running
     wally.update()
     wally.draw()
-
+    
     # Add a garbage
     
     # Ensure there's enough gap between garbage items
