@@ -36,12 +36,20 @@ objectcenter_lane= 245
 objectright_lane= 360
 objectlanes = [objectleft_lane, objectcenter_lane, objectright_lane]
 
+# colors
+white = (255, 255, 255)
+
+# game settings
+gameover = False
+score = 0
+
 # Height
-height = 500
+height = 1000
 
 #wally
-class Runner:
+class Runner(pygame.sprite.Sprite):
     def __init__(self, x, y, animation_list):
+        pygame.sprite.Sprite.__init__(self)
         self.alive = True
         self.animation_list = animation_list
         self.frame_index = 0
@@ -50,19 +58,30 @@ class Runner:
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
     
-    def update(self):
+    def update(self, garbage_group):
         animation_cooldown = 20
-        #handle animation
-        #update image
+        # Handle animation
+        # Update image
         self.image = self.animation_list[self.frame_index]
-        #check if enough time has passed since last update
+        # Check if enough time has passed since the last update
         if pygame.time.get_ticks() - self.update_time > animation_cooldown:
             self.update_time = pygame.time.get_ticks()
             self.frame_index += 1
-            
-        #if the animation surpasses last frame, reset
+
+        # If the animation surpasses the last frame, reset
         if self.frame_index >= len(self.animation_list):
             self.frame_index = 0
+
+        # Check for collision between runner and garbage objects
+        if pygame.sprite.spritecollide(self, garbage_group, False):
+            # Check if the runner is colliding with the corresponding type of garbage
+            if (isinstance(self, Bio) and any(isinstance(garbage, NonBioGarbage) for garbage in pygame.sprite.spritecollide(self, garbage_group, False))) or (isinstance(self, NonBio) and any(isinstance(garbage, BioGarbage) for garbage in pygame.sprite.spritecollide(self, garbage_group, False))):
+                # Game over
+                global gamerun
+                gamerun = False
+                print("Game over")
+
+        self.draw()
         
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -83,15 +102,16 @@ class NonBio(Runner):
             animation_list.append(img)
         super().__init__(x, y, animation_list)
 
+
 wally1 = Bio(250, 575)
 wally2 = NonBio(250, 575)
 
 active_wally = wally1
 prev_wally_position = active_wally.rect.center
 
-player_group = pygame.sprite.Group
-bio_group = pygame.sprite.Group
-nonbio_group = pygame.sprite.Group
+player_group = pygame.sprite.Group()
+bio_group = pygame.sprite.Group()
+nonbio_group = pygame.sprite.Group()
 
 
 class Garbage(pygame.sprite.Sprite):
@@ -99,7 +119,7 @@ class Garbage(pygame.sprite.Sprite):
             pygame.sprite.Sprite.__init__(self)
         
   # scale the image down so it's not wider than the lane
-            image_scale = 100 / image.get_rect().width
+            image_scale = 60 / image.get_rect().width
             new_width = image.get_rect().width * image_scale
             new_height = image.get_rect().height * image_scale
             self.image = pygame.transform.scale(image, (new_width, new_height))
@@ -159,7 +179,7 @@ while gamerun:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-
+    
      # Draw scrolling background
     if b_pos >= screen_h:
         b_pos = -screen_h
@@ -174,10 +194,15 @@ while gamerun:
     screen.blit(overlap_bg_image, (0, o_pos))
 
     # Update and draw the active version of Wally
-    active_wally.update()
+    active_wally.update(garbage_group)
     active_wally.draw()
 
-
+# display the score
+    font = pygame.font.Font(pygame.font.get_default_font(), 16)
+    text = font.render('Score: ' + str(score), True, white)
+    text_rect = text.get_rect()
+    text_rect.center = (50, 400)
+    screen.blit(text, text_rect)
 
     # Add a garbage
 
@@ -215,6 +240,20 @@ while gamerun:
         # Remove garbage once it goes off screen
         if garbage.rect.top >= height:
             garbage.kill()
+    
+    # Check for collision between Wally and garbage objects
+    collisions = pygame.sprite.spritecollide(active_wally, garbage_group, True)
+    for garbage in collisions:
+        # Check if the active Wally is colliding with the corresponding type of garbage
+        if (isinstance(active_wally, Bio) and isinstance(garbage, NonBioGarbage)) or (isinstance(active_wally, NonBio) and isinstance(garbage, BioGarbage)):
+            # Game over
+            pygame.time.wait(500000)
+            print("Game over")
+            
+        elif (active_wally == wally1 and isinstance(garbage, BioGarbage)) or (active_wally == wally2 and isinstance(garbage, NonBioGarbage)):
+            # Increment score
+            score += 1
+
 
     # Draw the garbage
     garbage_group.draw(screen)
