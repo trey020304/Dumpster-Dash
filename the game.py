@@ -1,4 +1,3 @@
-#import library
 import pygame
 from pygame.locals import *
 import sys
@@ -45,6 +44,16 @@ score = 0
 
 # Height
 height = 1000
+
+#Music
+game_music = pygame.mixer.Sound("assets\music\game_music.wav")
+game_music.set_volume(0.2)
+
+get_item = pygame.mixer.Sound("assets\music\get_item.mp3")
+get_item.set_volume(0.2)
+
+game_over = pygame.mixer.Sound("assets\music\game_over.mp3")
+game_over.set_volume(0.2)
 
 #wally
 class Runner(pygame.sprite.Sprite):
@@ -113,7 +122,6 @@ player_group = pygame.sprite.Group()
 bio_group = pygame.sprite.Group()
 nonbio_group = pygame.sprite.Group()
 
-
 class Garbage(pygame.sprite.Sprite):
         def __init__(self, image, x, y,):
             pygame.sprite.Sprite.__init__(self)
@@ -151,6 +159,8 @@ for nonbio_filename in nonbio_filenames:
     
     nonbiodegradable_images.append(image)
 
+#Play music 
+game_music.play(-1)
 
 # Loop to retain screen
 gamerun = True
@@ -188,7 +198,6 @@ while gamerun:
 
     b_pos += speed
     o_pos += speed
-   
 
     screen.blit(bg_image, (0, b_pos))
     screen.blit(overlap_bg_image, (0, o_pos))
@@ -247,13 +256,13 @@ while gamerun:
         # Check if the active Wally is colliding with the corresponding type of garbage
         if (isinstance(active_wally, Bio) and isinstance(garbage, NonBioGarbage)) or (isinstance(active_wally, NonBio) and isinstance(garbage, BioGarbage)):
             # Game over
-            pygame.time.wait(500000)
+            game_over.play()
             print("Game over")
             
         elif (active_wally == wally1 and isinstance(garbage, BioGarbage)) or (active_wally == wally2 and isinstance(garbage, NonBioGarbage)):
+            get_item.play()
             # Increment score
             score += 1
-
 
     # Draw the garbage
     garbage_group.draw(screen)
