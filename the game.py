@@ -313,6 +313,7 @@ class Game:
             if (isinstance(active_wally, Bio) and isinstance(garbage, NonBioGarbage)) or (
                     isinstance(active_wally, NonBio) and isinstance(garbage, BioGarbage)):
                 # Play game over sound
+                self.speed = 7
                 game_over_sound.play()
                 pygame.time.wait(1500)  # Wait for 2000 milliseconds (2 seconds)
                 switch_state("GameOver")
@@ -364,7 +365,6 @@ class GameOver:
 
         self.menu_button = menu_button_img.get_rect(center=(250, 600))
         self.font = pygame.font.Font(pygame.font.get_default_font(), 12)
-        self.exit_button = quit_button_img.get_rect(center=(250, 600))
         self.font = pygame.font.Font(pygame.font.get_default_font(), 25)
         self.rect = game_over_img.get_rect(center=(250, 200))
         self.score = score
@@ -385,6 +385,7 @@ class GameOver:
                 game.score = self.score
                 game.highest_score = self.highest_score
             elif self.menu_button.collidepoint(event.pos):
+                game.score = 0
                 switch_state("MainMenu")
 
     def update(self):
