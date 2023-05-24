@@ -23,6 +23,7 @@ game_over_img = pygame.image.load('assets/logos_and_icons/game_over.png').conver
 play_button_img = pygame.image.load('assets/logos_and_icons/play.png').convert_alpha()
 quit_button_img = pygame.image.load('assets/logos_and_icons/quit.png').convert_alpha()
 restart_button_img = pygame.image.load('assets/logos_and_icons/restart.png').convert_alpha()
+menu_button_img = pygame.image.load('assets/logos_and_icons/main_menu.png').convert_alpha()
 
 #logo
 class Logo():
@@ -247,6 +248,7 @@ class Game:
         self.score = 0
         self.highest_score = 0  # Add this line
         self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
+        self.increment_timer = 0  # New attribute to track the increment timer
 
     def handle_events(self, event):
         global active_wally  # Add this line
@@ -275,6 +277,7 @@ class Game:
     def update(self):
         active_wally.update(garbage_group)
 
+        
         # Add garbage
         if len(garbage_group) < 3:
             add_garbage = True
@@ -301,7 +304,7 @@ class Game:
                     isinstance(active_wally, NonBio) and isinstance(garbage, BioGarbage)):
                 # Play game over sound
                 game_over_sound.play()
-                pygame.time.wait(2000)  # Wait for 2000 milliseconds (2 seconds)
+                pygame.time.wait(2500)  # Wait for 2000 milliseconds (2 seconds)
                 switch_state("GameOver")
             elif (active_wally == wally1 and isinstance(garbage, BioGarbage)) or (active_wally == wally2 and isinstance(garbage, NonBioGarbage)):
                 # Play get item sound
@@ -328,7 +331,7 @@ class Game:
 class GameOver:
     def __init__(self, score, highest_score):
         self.restart_button = restart_button_img.get_rect(center=(250, 500))
-        self.exit_button = quit_button_img.get_rect(center=(250, 600))
+        self.menu_button = menu_button_img.get_rect(center=(250, 600))
         self.font = pygame.font.Font(pygame.font.get_default_font(), 12)
         self.rect = game_over_img.get_rect(center=(250, 200))
         self.score = score  # Update this line
@@ -339,10 +342,9 @@ class GameOver:
             if self.restart_button.collidepoint(event.pos):
                 switch_state("Game")
                 game.score = self.score
-                game.highest_score = self.highest_score  # Update this line
-            elif self.exit_button.collidepoint(event.pos):
-                pygame.quit()
-                sys.exit()
+                game.highest_score = self.highest_score
+            elif self.menu_button.collidepoint(event.pos):
+                switch_state("MainMenu")
 
     def update(self):
         pass
@@ -350,7 +352,7 @@ class GameOver:
     def draw(self):
         screen.blit(game_over_img, (self.rect.x, self.rect.y))
         screen.blit(restart_button_img, self.restart_button)
-        screen.blit(quit_button_img, self.exit_button)
+        screen.blit(menu_button_img, self.menu_button)
 
         score_text = self.font.render('Score: ' + str(game.score), True, white)
         score_rect = score_text.get_rect()
