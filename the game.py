@@ -247,7 +247,6 @@ class MainMenu:
 class Game:
     def __init__(self):
         self.score = 0
-        self.highest_score = 0
         self.highest_score = highest_score  # Assign the initial highest score
         self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
         self.increment_timer = 0  # New attribute to track the increment timer
@@ -437,7 +436,7 @@ while True:
     elif current_state == "GameOver":
         game_over.update()
         game_over.draw()
-        game.highest_score = game_over.highest_score  # Update the highest score in the Game instance
+        game_over.highest_score = game.highest_score  # Update the highest score in the Game instance
 
     pygame.display.update()
     clock.tick(FPS)
