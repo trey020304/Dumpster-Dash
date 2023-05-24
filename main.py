@@ -152,10 +152,6 @@ wally2 = NonBio(250, 575)
 active_wally = wally1
 prev_wally_position = active_wally.rect.center
 
-player_group = pygame.sprite.Group()
-bio_group = pygame.sprite.Group()
-nonbio_group = pygame.sprite.Group()
-
 class Garbage(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -223,11 +219,9 @@ def create_garbage():
             garbage = garbage_object(image, random.choice(objectlanes), -height / 2)
             garbage_group.add(garbage)
 
-
 def switch_state(state):
     global current_state
     current_state = state
-
 
 # Game states
 class MainMenu:
@@ -287,7 +281,6 @@ class Game:
         if self.score > self.highest_score:
             self.highest_score = self.score  # Update the highest score
 
-        
         # Add garbage
         if len(garbage_group) < 3:
             add_garbage = True
@@ -334,8 +327,6 @@ class Game:
 
 
     def draw(self):
-        screen.blit(bg_image, (0, b_pos))
-        screen.blit(overlap_bg_image, (0, o_pos - screen_h))
 
         active_wally.draw()
 
@@ -362,7 +353,6 @@ class Game:
 class GameOver:
     def __init__(self, score, highest_score):
         self.restart_button = restart_button_img.get_rect(center=(250, 500))
-
         self.menu_button = menu_button_img.get_rect(center=(250, 600))
         self.font = pygame.font.Font(pygame.font.get_default_font(), 12)
         self.font = pygame.font.Font(pygame.font.get_default_font(), 25)
@@ -435,7 +425,6 @@ while True:
 
     b_pos += speed
     o_pos += speed
-   
 
     screen.blit(bg_image, (0, b_pos))
     screen.blit(overlap_bg_image, (0, o_pos))
