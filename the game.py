@@ -182,14 +182,14 @@ garbage_group = pygame.sprite.Group()
 
 # Load the garbage images
 gar1 = BioGarbage
-bio_filenames = ['banana peel.png', 'milk carton.png', 'box.png']
+bio_filenames = ['banana peel.png', 'milk carton.png', 'box.png', 'Leaves.png', 'Poop.png', 'Log.png', 'Book.png', 'Apple.png', 'Meat.png', 'Fishbone.png']
 biodegradable_images = []
 for bio_filename in bio_filenames:
     image = pygame.image.load('assets/' + bio_filename)
     biodegradable_images.append(image)
 
 gar2 = NonBioGarbage
-nonbio_filenames = ['plastic bag.png', 'soda bottle.png', 'water bottle.png']
+nonbio_filenames = ['plastic bag.png', 'soda bottle.png', 'water bottle.png', 'Battery.png', 'Lightbulb.png', 'Phone.png', 'Laptop.png', 'Can.png', 'Soda.png', 'Glass.png']
 nonbiodegradable_images = []
 for nonbio_filename in nonbio_filenames:
     image = pygame.image.load('assets/' + nonbio_filename)
@@ -215,6 +215,13 @@ def create_garbage():
     garbage = garbage_object(image, lane, -height / 2)
     garbage.rect.center = (lane, -height / 2)
     garbage_group.add(garbage)
+    
+    # Increase quantity of garbage spawned based on speed
+    if speed >= 10:
+    # Spawn additional garbage objects
+        for _ in range(int(speed / 25)):
+            garbage = garbage_object(image, random.choice(objectlanes), -height / 2)
+            garbage_group.add(garbage)
 
 
 def switch_state(state):
@@ -250,6 +257,7 @@ class Game:
         self.highest_score = highest_score  # Assign the initial highest score
         self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
         self.increment_timer = 0  # New attribute to track the increment timer
+        self.speed = 7  # Initial speed
 
     def handle_events(self, event):
         global active_wally  # Add this line
@@ -292,7 +300,7 @@ class Game:
 
         # Move and remove garbage
         for garbage in garbage_group:
-            garbage.rect.y += speed
+            garbage.rect.y += self.speed
 
             # Remove garbage once it goes off screen
             if garbage.rect.top >= height:
@@ -306,7 +314,7 @@ class Game:
                     isinstance(active_wally, NonBio) and isinstance(garbage, BioGarbage)):
                 # Play game over sound
                 game_over_sound.play()
-                pygame.time.wait(2500)  # Wait for 2000 milliseconds (2 seconds)
+                pygame.time.wait(1500)  # Wait for 2000 milliseconds (2 seconds)
                 switch_state("GameOver")
                 
             elif (active_wally == wally1 and isinstance(garbage, BioGarbage)) or (active_wally == wally2 and isinstance(garbage, NonBioGarbage)):
@@ -315,8 +323,13 @@ class Game:
                 
                 # Increment score
                 self.score += 1
+                self.increment_timer += 1
         if self.score > self.highest_score:
             self.highest_score = self.score
+            
+        if self.increment_timer >= 5:
+            self.speed += .75  # Increase the speed
+            self.increment_timer = 0  # Reset the increment timer
 
 
     def draw(self):
@@ -382,14 +395,25 @@ class GameOver:
         screen.blit(restart_button_img, self.restart_button)
         screen.blit(menu_button_img, self.menu_button)
 
-        score_text = self.font.render('Score: ' + str(game.score), True, white)
+        score_text = self.font.render('Score: ' + str(game.score), True, black)
         score_rect = score_text.get_rect()
         score_rect.center = (250, 400)
         screen.blit(score_text, score_rect)
         
-        highest_score_text = self.font.render('Highest Score: ' + str(self.highest_score), True, white)
+        score_text = self.font.render('Score: ' + str(game.score), True, white)
+        score_rect = score_text.get_rect()
+        score_rect.center = (247, 397)
+        screen.blit(score_text, score_rect)
+        
+        
+        highest_score_text = self.font.render('Highest Score: ' + str(self.highest_score), True, black)
         highest_score_rect = highest_score_text.get_rect()
         highest_score_rect.center = (250, 425)
+        screen.blit(highest_score_text, highest_score_rect)
+        
+        highest_score_text = self.font.render('Highest Score: ' + str(self.highest_score), True, white)
+        highest_score_rect = highest_score_text.get_rect()
+        highest_score_rect.center = (247, 422)
         screen.blit(highest_score_text, highest_score_rect)
 
 # Create game states
