@@ -57,6 +57,7 @@ objectlanes = [objectleft_lane, objectcenter_lane, objectright_lane]
 
 # Colors
 white = (255, 255, 255)
+black = (0, 0, 0)
 
 # Game settings
 score = 0
@@ -245,7 +246,8 @@ class MainMenu:
 class Game:
     def __init__(self):
         self.score = 0
-        self.highest_score = 0  # Add this line
+        self.highest_score = 0
+        self.highest_score = highest_score  # Assign the initial highest score
         self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
 
     def handle_events(self, event):
@@ -270,10 +272,11 @@ class Game:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-
-
+            
     def update(self):
         active_wally.update(garbage_group)
+        if self.score > self.highest_score:
+            self.highest_score = self.score  # Update the highest score
 
         # Add garbage
         if len(garbage_group) < 3:
@@ -301,15 +304,17 @@ class Game:
                     isinstance(active_wally, NonBio) and isinstance(garbage, BioGarbage)):
                 # Play game over sound
                 game_over_sound.play()
-                pygame.time.wait(2000)  # Wait for 2000 milliseconds (2 seconds)
+                pygame.time.wait(1500)  # Wait for 2000 milliseconds (2 seconds)
                 switch_state("GameOver")
+                
             elif (active_wally == wally1 and isinstance(garbage, BioGarbage)) or (active_wally == wally2 and isinstance(garbage, NonBioGarbage)):
                 # Play get item sound
                 get_item_sound.play()
+                
                 # Increment score
                 self.score += 1
-                if self.score > self.highest_score:
-                    self.highest_score = self.score  # Update the highest_score variable if the current score is higher
+        if self.score > self.highest_score:
+            self.highest_score = self.score
 
 
     def draw(self):
@@ -319,20 +324,41 @@ class Game:
         active_wally.draw()
 
         # Display the score and highest score
-        score_text = self.font.render('Score: ' + str(self.score), True, white)
+        font = pygame.font.Font(pygame.font.get_default_font(), 25)
+        score_text = font.render('Score: ' + str(self.score), True, black)
         score_rect = score_text.get_rect()
-        score_rect.center = (50, 400)
+        score_rect.center = (246, 63)
         screen.blit(score_text, score_rect)
         garbage_group.draw(screen)
+        
+        font = pygame.font.Font(pygame.font.get_default_font(), 25)
+        score_text = font.render('Score: ' + str(self.score), True, white)
+        score_rect = score_text.get_rect()
+        score_rect.center = (243, 60)
+        screen.blit(score_text, score_rect)
+        garbage_group.draw(screen)
+        
+        if self.score > self.highest_score:
+            self.highest_score = self.score
+        
+        
 
 class GameOver:
     def __init__(self, score, highest_score):
         self.restart_button = restart_button_img.get_rect(center=(250, 500))
         self.exit_button = quit_button_img.get_rect(center=(250, 600))
-        self.font = pygame.font.Font(pygame.font.get_default_font(), 12)
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 25)
         self.rect = game_over_img.get_rect(center=(250, 200))
-        self.score = score  # Update this line
-        self.highest_score = highest_score  # Update this line
+        self.score = score
+        self.highest_score = highest_score
+        
+        def switch_state(state):
+            global current_state
+            if state == "GameOver":
+                current_state = "GameOver"
+                game_over = GameOver(game.score, game.highest_score)  # Pass the highest score
+            else:
+                current_state = state
 
     def handle_events(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -356,8 +382,8 @@ class GameOver:
         score_rect = score_text.get_rect()
         score_rect.center = (250, 400)
         screen.blit(score_text, score_rect)
-
-        highest_score_text = self.font.render('Highest Score: ' + str(game.highest_score), True, white)
+        
+        highest_score_text = self.font.render('Highest Score: ' + str(self.highest_score), True, white)
         highest_score_rect = highest_score_text.get_rect()
         highest_score_rect.center = (250, 425)
         screen.blit(highest_score_text, highest_score_rect)
@@ -406,6 +432,7 @@ while True:
     elif current_state == "GameOver":
         game_over.update()
         game_over.draw()
+        game.highest_score = game_over.highest_score  # Update the highest score in the Game instance
 
     pygame.display.update()
     clock.tick(FPS)
