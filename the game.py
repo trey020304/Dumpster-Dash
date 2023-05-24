@@ -3,59 +3,87 @@ from pygame.locals import *
 import sys
 import random
 
-#initialize pygame
+# Initialize pygame
 pygame.init()
 
 clock = pygame.time.Clock()
 FPS = 60
 
-#window dimensions
+# Window dimensions
 screen_w = 500
 screen_h = 720
 
-#create window
+# Create window
 screen = pygame.display.set_mode((screen_w, screen_h))
 pygame.display.set_caption('Dumpster Dash')
 
-#scrolling background
+#button initialize
+menu_logo_img = pygame.image.load('assets/logos_and_icons/menu_logo.png').convert_alpha()
+game_over_img = pygame.image.load('assets/logos_and_icons/game_over.png').convert_alpha()
+play_button_img = pygame.image.load('assets/logos_and_icons/play.png').convert_alpha()
+quit_button_img = pygame.image.load('assets/logos_and_icons/quit.png').convert_alpha()
+restart_button_img = pygame.image.load('assets/logos_and_icons/restart.png').convert_alpha()
+
+#logo
+class Logo():
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+    def draw (self):
+        screen.blit(self.image, (self.rect.x, self.rect.y))
+
+menu_logo = Logo(250, 200, menu_logo_img)
+game_over = Logo(250, 200, game_over_img)
+
+# Scrolling background
 bg_image = pygame.image.load('assets/bg.png').convert()
 overlap_bg_image = pygame.image.load('assets/bg.png').convert()
 b_pos = 0
 o_pos = 720
 speed = 7
 
-#lane coordinates
+# Lane coordinates
 left_lane = 150
 center_lane = 166
 right_lane = 275  
 lanes = [left_lane, center_lane, right_lane]
 
-objectleft_lane= 130
-objectcenter_lane= 245
-objectright_lane= 360
+objectleft_lane = 130
+objectcenter_lane = 245
+objectright_lane = 360
 objectlanes = [objectleft_lane, objectcenter_lane, objectright_lane]
 
-# colors
+# Colors
 white = (255, 255, 255)
 
-# game settings
-gameover = False
+# Game settings
 score = 0
+highest_score = 0
 
 # Height
 height = 1000
 
-#Music
-game_music = pygame.mixer.Sound("assets\music\game_music.wav")
-game_music.set_volume(0.2)
+# Music
+# Music
+game_music = "assets/music/game_music.wav"
 
-get_item = pygame.mixer.Sound("assets\music\get_item.mp3")
-get_item.set_volume(0.2)
+# Load audio effects
+get_item_sound = pygame.mixer.Sound("assets/music/get_item.mp3")
+game_over_sound = pygame.mixer.Sound("assets/music/game_over.mp3")
 
-game_over = pygame.mixer.Sound("assets\music\game_over.mp3")
-game_over.set_volume(0.2)
 
-#wally
+# Load music
+pygame.mixer.music.load(game_music)
+
+# Play music
+pygame.mixer.music.play(-1)  # -1 plays the music indefinitely
+
+# Set music volume
+pygame.mixer.music.set_volume(0.2)
+
+# Wally
 class Runner(pygame.sprite.Sprite):
     def __init__(self, x, y, animation_list):
         pygame.sprite.Sprite.__init__(self)
@@ -66,7 +94,7 @@ class Runner(pygame.sprite.Sprite):
         self.image = self.animation_list[self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-    
+
     def update(self, garbage_group):
         animation_cooldown = 20
         # Handle animation
@@ -84,16 +112,19 @@ class Runner(pygame.sprite.Sprite):
         # Check for collision between runner and garbage objects
         if pygame.sprite.spritecollide(self, garbage_group, False):
             # Check if the runner is colliding with the corresponding type of garbage
-            if (isinstance(self, Bio) and any(isinstance(garbage, NonBioGarbage) for garbage in pygame.sprite.spritecollide(self, garbage_group, False))) or (isinstance(self, NonBio) and any(isinstance(garbage, BioGarbage) for garbage in pygame.sprite.spritecollide(self, garbage_group, False))):
+            if (
+                (isinstance(self, Bio) and any(isinstance(garbage, NonBioGarbage) for garbage in pygame.sprite.spritecollide(self, garbage_group, False))) 
+                or (isinstance(self, NonBio) and any(isinstance(garbage, BioGarbage) for garbage in pygame.sprite.spritecollide(self, garbage_group, False)))
+            ):
                 # Game over
-                global gamerun
-                gamerun = False
+                switch_state("Game Over")
                 print("Game over")
 
         self.draw()
-        
+
     def draw(self):
         screen.blit(self.image, self.rect)
+
 
 class Bio(Runner):
     def __init__(self, x, y):
@@ -102,7 +133,8 @@ class Bio(Runner):
             img = pygame.image.load(f'assets/wallyrunbio/{i}.png')
             animation_list.append(img)
         super().__init__(x, y, animation_list)
-        
+
+
 class NonBio(Runner):
     def __init__(self, x, y):
         animation_list = []
@@ -123,23 +155,26 @@ bio_group = pygame.sprite.Group()
 nonbio_group = pygame.sprite.Group()
 
 class Garbage(pygame.sprite.Sprite):
-        def __init__(self, image, x, y,):
-            pygame.sprite.Sprite.__init__(self)
-        
-  # scale the image down so it's not wider than the lane
-            image_scale = 60 / image.get_rect().width
-            new_width = image.get_rect().width * image_scale
-            new_height = image.get_rect().height * image_scale
-            self.image = pygame.transform.scale(image, (new_width, new_height))
-            self.rect = self.image.get_rect()
-            self.rect.center = [x, y]
-            
+    def __init__(self, image, x, y):
+        pygame.sprite.Sprite.__init__(self)
+
+        # Scale the image down so it's not wider than the lane
+        image_scale = 60 / image.get_rect().width
+        new_width = image.get_rect().width * image_scale
+        new_height = image.get_rect().height * image_scale
+        self.image = pygame.transform.scale(image, (new_width, new_height))
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
+
+
 class BioGarbage(Garbage):
     pass
 
+
 class NonBioGarbage(Garbage):
     pass
-            
+
+
 # Sprite groups
 garbage_group = pygame.sprite.Group()
 
@@ -149,48 +184,195 @@ bio_filenames = ['banana peel.png', 'milk carton.png', 'box.png']
 biodegradable_images = []
 for bio_filename in bio_filenames:
     image = pygame.image.load('assets/' + bio_filename)
-    biodegradable_images.append(image) 
+    biodegradable_images.append(image)
 
 gar2 = NonBioGarbage
 nonbio_filenames = ['plastic bag.png', 'soda bottle.png', 'water bottle.png']
 nonbiodegradable_images = []
 for nonbio_filename in nonbio_filenames:
     image = pygame.image.load('assets/' + nonbio_filename)
-    
     nonbiodegradable_images.append(image)
 
-#Play music 
-game_music.play(-1)
 
-# Loop to retain screen
-gamerun = True
-while gamerun:
-    clock.tick(FPS)  # FPS of game
+def create_garbage():
+    # Select a random lane
+    lane = random.choice(objectlanes)
 
-    # Event Handle
-    for event in pygame.event.get():
-        if event.type == KEYDOWN:
-            if event.key == K_LEFT and active_wally.rect.center[0] > left_lane:
+    garbage_list = [gar1, gar2]
+
+    # Select a random garbage object
+    garbage_object = random.choice(garbage_list)
+
+    # Select a random garbage image
+    if garbage_object == gar1:
+        image = random.choice(biodegradable_images)
+    else:
+        image = random.choice(nonbiodegradable_images)
+
+    # Create a new garbage object with the selected image
+    garbage = garbage_object(image, lane, -height / 2)
+    garbage.rect.center = (lane, -height / 2)
+    garbage_group.add(garbage)
+
+
+def switch_state(state):
+    global current_state
+    current_state = state
+
+
+# Game states
+class MainMenu:
+    def __init__(self):
+        self.play_button = play_button_img.get_rect(center=(250, 500))
+        self.exit_button = quit_button_img.get_rect(center=(250, 600))
+
+    def handle_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.play_button.collidepoint(event.pos):
+                switch_state("Game")
+            elif self.exit_button.collidepoint(event.pos):
+                pygame.quit()
+                sys.exit()
+
+    def update(self):
+        pass
+
+    def draw(self):
+        screen.blit(menu_logo_img, (menu_logo.rect.x, menu_logo.rect.y))  # Draw the menu logo
+        screen.blit(play_button_img, self.play_button)
+        screen.blit(quit_button_img, self.exit_button)
+
+class Game:
+    def __init__(self):
+        self.score = 0
+        self.highest_score = 0  # Add this line
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
+
+    def handle_events(self, event):
+        global active_wally  # Add this line
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT and active_wally.rect.center[0] > left_lane:
                 active_wally.rect.left -= 115
-            elif event.key == K_RIGHT and active_wally.rect.center[0] < right_lane:
+            elif event.key == pygame.K_RIGHT and active_wally.rect.center[0] < right_lane:
                 active_wally.rect.left += 115
-            elif event.key == K_q:
+            elif event.key == pygame.K_q:
                 prev_wally_position = active_wally.rect.center  # Store the current position
                 active_wally = wally1
                 active_wally.rect.center = prev_wally_position  # Set the position to the stored position
-            elif event.key == K_e:
+            elif event.key == pygame.K_e:
                 prev_wally_position = active_wally.rect.center  # Store the current position
                 active_wally = wally2
                 active_wally.rect.center = prev_wally_position  # Set the position to the stored position
-            # Quitting the Game           
-            elif event.key == K_ESCAPE:
-                gamerun = False
-                sys.exit()
-        if event.type == QUIT:
+            # Quitting the Game
+            elif event.key == pygame.K_ESCAPE:
+                switch_state("MainMenu")
+                return
+        if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
+
+    def update(self):
+        active_wally.update(garbage_group)
+
+        # Add garbage
+        if len(garbage_group) < 3:
+            add_garbage = True
+            for garbage in garbage_group:
+                if garbage.rect.top < garbage.rect.height * 1:  # Closeness of spawning
+                    add_garbage = False
+
+            if add_garbage:
+                create_garbage()
+
+        # Move and remove garbage
+        for garbage in garbage_group:
+            garbage.rect.y += speed
+
+            # Remove garbage once it goes off screen
+            if garbage.rect.top >= height:
+                garbage.kill()
+
+        # Check for collision between Wally and garbage objects
+        collisions = pygame.sprite.spritecollide(active_wally, garbage_group, True)
+        for garbage in collisions:
+            # Check if the active Wally is colliding with the corresponding type of garbage
+            if (isinstance(active_wally, Bio) and isinstance(garbage, NonBioGarbage)) or (
+                    isinstance(active_wally, NonBio) and isinstance(garbage, BioGarbage)):
+                # Play game over sound
+                game_over_sound.play()
+                pygame.time.wait(2000)  # Wait for 2000 milliseconds (2 seconds)
+                switch_state("GameOver")
+            elif (active_wally == wally1 and isinstance(garbage, BioGarbage)) or (active_wally == wally2 and isinstance(garbage, NonBioGarbage)):
+                # Play get item sound
+                get_item_sound.play()
+                # Increment score
+                self.score += 1
+                if self.score > self.highest_score:
+                    self.highest_score = self.score  # Update the highest_score variable if the current score is higher
+
+
+    def draw(self):
+        screen.blit(bg_image, (0, b_pos))
+        screen.blit(overlap_bg_image, (0, o_pos - screen_h))
+
+        active_wally.draw()
+
+        # Display the score and highest score
+        score_text = self.font.render('Score: ' + str(self.score), True, white)
+        score_rect = score_text.get_rect()
+        score_rect.center = (50, 400)
+        screen.blit(score_text, score_rect)
+        garbage_group.draw(screen)
+
+class GameOver:
+    def __init__(self, score, highest_score):
+        self.restart_button = restart_button_img.get_rect(center=(250, 500))
+        self.exit_button = quit_button_img.get_rect(center=(250, 600))
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 12)
+        self.rect = game_over_img.get_rect(center=(250, 200))
+        self.score = score  # Update this line
+        self.highest_score = highest_score  # Update this line
+
+    def handle_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.restart_button.collidepoint(event.pos):
+                switch_state("Game")
+                game.score = self.score
+                game.highest_score = self.highest_score  # Update this line
+            elif self.exit_button.collidepoint(event.pos):
+                pygame.quit()
+                sys.exit()
+
+    def update(self):
+        pass
+
+    def draw(self):
+        screen.blit(game_over_img, (self.rect.x, self.rect.y))
+        screen.blit(restart_button_img, self.restart_button)
+        screen.blit(quit_button_img, self.exit_button)
+
+        score_text = self.font.render('Score: ' + str(game.score), True, white)
+        score_rect = score_text.get_rect()
+        score_rect.center = (250, 400)
+        screen.blit(score_text, score_rect)
+
+        highest_score_text = self.font.render('Highest Score: ' + str(game.highest_score), True, white)
+        highest_score_rect = highest_score_text.get_rect()
+        highest_score_rect.center = (250, 425)
+        screen.blit(highest_score_text, highest_score_rect)
+
+# Create game states
+main_menu = MainMenu()
+game = Game()
+game_over = GameOver(game.score, game.highest_score)
+
+# Set starting game state
+current_state = "MainMenu"
+
+while True:
     
-     # Draw scrolling background
+    # Draw scrolling background
     if b_pos >= screen_h:
         b_pos = -screen_h
     if o_pos >= screen_h:
@@ -198,74 +380,32 @@ while gamerun:
 
     b_pos += speed
     o_pos += speed
+   
 
     screen.blit(bg_image, (0, b_pos))
     screen.blit(overlap_bg_image, (0, o_pos))
 
-    # Update and draw the active version of Wally
-    active_wally.update(garbage_group)
-    active_wally.draw()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
 
-# display the score
-    font = pygame.font.Font(pygame.font.get_default_font(), 16)
-    text = font.render('Score: ' + str(score), True, white)
-    text_rect = text.get_rect()
-    text_rect.center = (50, 400)
-    screen.blit(text, text_rect)
+        if current_state == "MainMenu":
+            main_menu.handle_events(event)
+        elif current_state == "Game":
+            game.handle_events(event)
+        elif current_state == "GameOver":
+            game_over.handle_events(event)
 
-    # Add a garbage
+    if current_state == "MainMenu":
+        main_menu.update()
+        main_menu.draw()
+    elif current_state == "Game":
+        game.update()
+        game.draw()
+    elif current_state == "GameOver":
+        game_over.update()
+        game_over.draw()
 
-    # Ensure there's enough gap between garbage items
-    if len(garbage_group) < 3:
-        add_garbage = True
-        for garbage in garbage_group:
-            if garbage.rect.top < garbage.rect.height * 1:  # Closeness of spawning
-                add_garbage = False
-
-        if add_garbage:
-            # Select a random lane
-            lane = random.choice(objectlanes)
-
-            garbage_list = [gar1, gar2]
-
-            # Select a random garbage object
-            garbage_object = random.choice(garbage_list)
-
-            # Select a random garbage image
-            if garbage_object == gar1:
-                image = random.choice(biodegradable_images)
-            else:
-                image = random.choice(nonbiodegradable_images)
-
-            # Create a new garbage object with the selected image
-            garbage = garbage_object(image, lane, -height / 2)
-            garbage.rect.center = (lane, -height / 2)
-            garbage_group.add(garbage)
-
-    # Move the garbage and remove it if it goes off screen
-    for garbage in garbage_group:
-        garbage.rect.y += speed
-
-        # Remove garbage once it goes off screen
-        if garbage.rect.top >= height:
-            garbage.kill()
-    
-    # Check for collision between Wally and garbage objects
-    collisions = pygame.sprite.spritecollide(active_wally, garbage_group, True)
-    for garbage in collisions:
-        # Check if the active Wally is colliding with the corresponding type of garbage
-        if (isinstance(active_wally, Bio) and isinstance(garbage, NonBioGarbage)) or (isinstance(active_wally, NonBio) and isinstance(garbage, BioGarbage)):
-            # Game over
-            game_over.play()
-            print("Game over")
-            
-        elif (active_wally == wally1 and isinstance(garbage, BioGarbage)) or (active_wally == wally2 and isinstance(garbage, NonBioGarbage)):
-            get_item.play()
-            # Increment score
-            score += 1
-
-    # Draw the garbage
-    garbage_group.draw(screen)
-
-    # Update display window
     pygame.display.update()
+    clock.tick(FPS)
