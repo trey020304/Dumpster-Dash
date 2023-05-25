@@ -212,12 +212,6 @@ def create_garbage():
     garbage.rect.center = (lane, -height / 2)
     garbage_group.add(garbage)
     
-    # Increase quantity of garbage spawned based on speed
-    if speed >= 10:
-    # Spawn additional garbage objects
-        for _ in range(int(speed / 25)):
-            garbage = garbage_object(image, random.choice(objectlanes), -height / 2)
-            garbage_group.add(garbage)
 
 def switch_state(state):
     global current_state
@@ -282,10 +276,10 @@ class Game:
             self.highest_score = self.score  # Update the highest score
 
         # Add garbage
-        if len(garbage_group) < 3:
+        if len(garbage_group) < 3: #Length of the garbage group in relation to other garbage
             add_garbage = True
             for garbage in garbage_group:
-                if garbage.rect.top < garbage.rect.height * 1:  # Closeness of spawning
+                if garbage.rect.top < garbage.rect.height * 1:  # Closeness of spawning with one another
                     add_garbage = False
 
             if add_garbage:
@@ -318,19 +312,18 @@ class Game:
                 # Increment score
                 self.score += 1
                 self.increment_timer += 1
-        if self.score > self.highest_score:
-            self.highest_score = self.score
-            
+                
         if self.increment_timer >= 5:
             self.speed += .75  # Increase the speed
             self.increment_timer = 0  # Reset the increment timer
+            
 
 
     def draw(self):
 
         active_wally.draw()
 
-        # Display the score and highest score
+        # Display the score 
         font = pygame.font.Font(pygame.font.get_default_font(), 25)
         score_text = font.render('Score: ' + str(self.score), True, black)
         score_rect = score_text.get_rect()
